@@ -1,63 +1,43 @@
 import java.io.*;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Scanner;
 
 public class SaveManager {
-    //It will create a file with everything saved in it.
     private static final String SAVE_FILE = "fishing_save.txt";
 
-    public static void saveGame(int xp, int money, int zone, List<Integer> caughtFishIds, List<Integer> caughtFishRarities) {
+    // Save player stats and current zone
+    public static void saveGame(Player player, int zone) {
         try (PrintWriter writer = new PrintWriter(new FileWriter(SAVE_FILE))) {
-            writer.println(xp);
-            writer.println(money);
+            writer.println(player.getXp());
+            writer.println(player.getMoney());
+            writer.println(player.getLevel());
             writer.println(zone);
-            writer.println(caughtFishIds.size());
-
-            for (int i = 0; i < caughtFishIds.size(); i++) {
-                // Saving fish as "ID Rarity" on one line
-                writer.println(caughtFishIds.get(i) + " " + caughtFishRarities.get(i));
-            }
-            System.out.println("Game saved to readable text file!");
+            System.out.println("\u001B[32m[System] Game progress saved to " + SAVE_FILE + "\u001B[0m");
         } catch (IOException e) {
-            System.err.println("Error while saving: " + e.getMessage());
+            System.err.println("[Error] Save failed: " + e.getMessage());
         }
     }
 
-    // LOAD: Reading readable text back into the game
-    public static void loadGame() {
+    // Load player stats and current zone
+    public static void loadGame(Player player, GameLogic logic) {
         File file = new File(SAVE_FILE);
         if (!file.exists()) {
-            System.out.println("No save found!");
+            System.out.println("[System] No save file found. Starting a new journey!");
             return;
         }
 
         try (Scanner scanner = new Scanner(file)) {
-            if (!scanner.hasNextInt()) return;
+            if (scanner.hasNextInt()) {
+                int xp = scanner.nextInt();
+                int money = scanner.nextInt();
+                int level = scanner.nextInt();
+                int zone = scanner.nextInt();
 
-            int xp = scanner.nextInt();
-            int money = scanner.nextInt();
-            int zone = scanner.nextInt();
-            int fishCount = scanner.nextInt();
-
-            System.out.println("--- LOADED FROM TEXT ---");
-            System.out.println("XP: " + xp + " | Money: " + money + " | Zone: " + zone);
-
-            for (int i = 0; i < fishCount; i++) {
-                int id = scanner.nextInt();
-                int rarity = scanner.nextInt();
-                System.out.println("Fish: ID " + id + ", Rarity " + rarity);
+                player.loadPlayerData(xp, money, level);
+                logic.setCurrentZone(zone);
+                System.out.println("\u001B[36m[System] Save file loaded successfully!\u001B[0m");
             }
-        } catch (FileNotFoundException e) {
-            System.err.println("File not found.");
+        } catch (Exception e) {
+            System.err.println("[Error] Load failed: " + e.getMessage());
         }
-    }
-
-    public static void main(String[] args) {
-        List<Integer> ids = List.of(1, 2);
-        List<Integer> rarities = List.of(0, 3);
-
-        saveGame(550, 1000, 2, ids, rarities);
-        loadGame();
     }
 }
