@@ -1,2 +1,13 @@
 2026 May 11th
 Started working on the project - Fish attributes, cataloge, early Save system.
+
+
+2026 May 12
+Reworked the Saving system
+Added 2 more levels
+Added 24 more fish
+Added fish value and XP conversion
+Added XP and levels
+
+Added a Running Script (Game.java)
+Now every single progress you make will be saved upon exit from the game.
