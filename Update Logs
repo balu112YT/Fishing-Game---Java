@@ -11,3 +11,8 @@ Added XP and levels
 
 Added a Running Script (Game.java)
 Now every single progress you make will be saved upon exit from the game.
+
+2026 May 15
+Reworked inventory
+Added a shop
+Reworked save system
