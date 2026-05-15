@@ -48,24 +48,19 @@ public class GameLogic {
         // 3. Catch a random fish from the filtered list and calculate stats
         if (!possibleFish.isEmpty()) {
             Fish caughtFish = possibleFish.get(random.nextInt(possibleFish.size()));
-
-            // Generate random weight between min and max
             double weight = caughtFish.minWeight + (caughtFish.maxWeight - caughtFish.minWeight) * random.nextDouble();
             int value = caughtFish.calculateValue(weight);
-
-            // Calculate XP (Minimum 5 XP, or 1:1 ratio with value)
             int earnedXp = Math.max(5, value);
 
-            // Reward the player
-            player.addMoney(value);
             player.addXp(earnedXp);
+            player.addFishToInventory(caughtFish.id, weight);
 
             // Print the result to console
             System.out.println("\nCasting the line...");
             System.out.print("Something is biting... ");
             System.out.println(caughtFish.getColor() + "YOU CAUGHT A " + caughtFish.name.toUpperCase() + "!" + RESET);
-            System.out.printf("Weight: %.2f kg | Value: %d € | XP: %d | Rarity: %s\n",
-                    weight, value, earnedXp, caughtFish.rarity);
+            System.out.printf("Weight: %.2f kg | Rarity: %s | XP: %d\n", weight, caughtFish.rarity, earnedXp);
+            System.out.println("The fish has been added to your bucket. Visit the Shop to sell it!");
         }
     }
 
@@ -85,5 +80,9 @@ public class GameLogic {
 
     public void setCurrentZone(int zone) {
         this.currentZone = zone;
+    }
+
+    public HashMap<Integer, Fish> getFishCatalog() {
+        return this.fishCatalog;
     }
 }
