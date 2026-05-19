@@ -4,74 +4,100 @@ import java.util.List;
 import java.util.Random;
 
 public class GameLogic {
-    // Player data and game state
+    // Player data and game state variables
     private Player player = new Player();
     private HashMap<Integer, Fish> fishCatalog = new HashMap<>();
     private Random random = new Random();
     private int currentZone = 1; // Default starting zone
     private final String RESET = "\u001B[0m";
 
-    // Constructor: Initializes the fish database
+    // Constructor: Automatically initializes and loads the fish database
     public GameLogic() {
         FishDatabase.loadCatalog(fishCatalog);
     }
 
     // --- CORE FISHING LOGIC ---
     public void fishing() {
-        // 1. Roll for rarity based on percentages
-        double roll = random.nextDouble() * 100;
-        String chosenRarity;
-
-        if (roll < 60) chosenRarity = "Common";        // 60% chance
-        else if (roll < 85) chosenRarity = "Rare";     // 25% chance
-        else if (roll < 95) chosenRarity = "Epic";     // 10% chance
-        else if (roll < 99) chosenRarity = "Mythic";   // 4% chance
-        else chosenRarity = "Legendary";               // 1% chance
-
-        // 2. Filter available fish based on current zone and rolled rarity
-        List<Fish> possibleFish = new ArrayList<>();
-        for (Fish f : fishCatalog.values()) {
-            if (f.zone == currentZone && f.rarity.equals(chosenRarity)) {
-                possibleFish.add(f);
-            }
+        if (player.isInventoryFull()) {
+            System.out.println("\n\u001B[31m[Inventory Full] Your bucket is full (" +
+                    player.getInventory().size() + "/" + player.getMaxInventorySize() +
+                    ")! Go to the Shop to sell your fish.\u001B[0m");
+            return;
         }
 
-        // Safety fallback: if no fish found for the rarity, default to Common
-        if (possibleFish.isEmpty()) {
-            for (Fish f : fishCatalog.values()) {
-                if (f.zone == currentZone && f.rarity.equals("Common")) {
+        List<Fish> possibleFish = new ArrayList<>();
+        double luckBonus = player.getRarityLuckBonus();
+
+        // Check if a REAL bait is active (Count > 0 AND Type is between 1 and 5)
+        boolean isBaitTrulyActive = player.getBaitCount() > 0 && player.getEquippedBaitType() >= 1;
+
+        for (Fish f : fishCatalog.values()) {
+            if (f.zone == currentZone) {
+                double roll = random.nextDouble();
+
+                // Base drop rates from our rarity logic
+                double finalChance = 0.50; // Common
+                if (f.rarity.equalsIgnoreCase("Uncommon")) finalChance = 0.35;
+                else if (f.rarity.equalsIgnoreCase("Rare")) finalChance = 0.20;
+                else if (f.rarity.equalsIgnoreCase("Epic")) finalChance = 0.10;
+                else if (f.rarity.equalsIgnoreCase("Legendary")) finalChance = 0.04;
+                else if (f.rarity.equalsIgnoreCase("Mythic")) finalChance = 0.01;
+
+                // Apply luck bonus ONLY to high rarities
+                if (luckBonus > 0 && (f.rarity.equalsIgnoreCase("Epic") ||
+                        f.rarity.equalsIgnoreCase("Legendary") ||
+                        f.rarity.equalsIgnoreCase("Mythic"))) {
+                    finalChance += luckBonus;
+                }
+
+                if (roll <= finalChance) {
                     possibleFish.add(f);
                 }
             }
         }
 
-        // 3. Catch a random fish from the filtered list and calculate stats
+        System.out.println("\nCasting the line...");
+        // ONLY print bait message if the bait is actually valid and equipped
+        if (isBaitTrulyActive) {
+            System.out.println("\u001B[35m[Bait Active] The fish are attracted by your high-quality bait!\u001B[0m");
+        }
+
         if (!possibleFish.isEmpty()) {
             Fish caughtFish = possibleFish.get(random.nextInt(possibleFish.size()));
+
             double weight = caughtFish.minWeight + (caughtFish.maxWeight - caughtFish.minWeight) * random.nextDouble();
-            int value = caughtFish.calculateValue(weight);
-            int earnedXp = Math.max(5, value);
+            int baseValue = caughtFish.calculateValue(weight);
+            int earnedXp = Math.max(5, baseValue);
+
+            // ONLY consume bait if it is truly active
+            if (isBaitTrulyActive) {
+                player.useBait();
+            }
 
             player.addXp(earnedXp);
             player.addFishToInventory(caughtFish.id, weight);
 
-            // Print the result to console
-            System.out.println("\nCasting the line...");
             System.out.print("Something is biting... ");
             System.out.println(caughtFish.getColor() + "YOU CAUGHT A " + caughtFish.name.toUpperCase() + "!" + RESET);
             System.out.printf("Weight: %.2f kg | Rarity: %s | XP: %d\n", weight, caughtFish.rarity, earnedXp);
-            System.out.println("The fish has been added to your bucket. Visit the Shop to sell it!");
+            System.out.println("The fish has been added to your bucket (" +
+                    player.getInventory().size() + "/" + player.getMaxInventorySize() + ").");
+        } else {
+            if (isBaitTrulyActive) {
+                player.useBait();
+            }
+            System.out.println("The fish got away... Try again!");
         }
     }
 
-    // --- GETTERS AND SETTERS FOR SAVE/LOAD AND STATS ---
-
-    public void displayPlayerStats() {
-        player.showStats();
-    }
+    // --- SYSTEM GETTERS & SETTERS (Required by Shop, Game, and SaveManager) ---
 
     public Player getPlayer() {
         return this.player;
+    }
+
+    public HashMap<Integer, Fish> getFishCatalog() {
+        return this.fishCatalog;
     }
 
     public int getCurrentZone() {
@@ -82,7 +108,10 @@ public class GameLogic {
         this.currentZone = zone;
     }
 
-    public HashMap<Integer, Fish> getFishCatalog() {
-        return this.fishCatalog;
+    /**
+     * Legacy method bridge to display player profile through GameLogic if needed.
+     */
+    public void displayPlayerStats() {
+        player.showStats();
     }
 }
