@@ -5,6 +5,8 @@ public class Game {
 
     public static void main(String[] args) {
         GameLogic gameLogic = new GameLogic();
+        AreaManager areaManager = new AreaManager(); // Initialize the AreaManager
+        Shop shop = new Shop(); // Initialize the Shop once outside the loop
         Scanner scanner = new Scanner(System.in);
         boolean running = true;
 
@@ -12,21 +14,28 @@ public class Game {
 
         // Initial slot selection
         System.out.println("Select Save Slot (1, 2, or 3):");
-        currentSlot = Integer.parseInt(scanner.nextLine());
-        SaveManager.loadGame(gameLogic.getPlayer(), gameLogic, currentSlot);
+        try {
+            currentSlot = Integer.parseInt(scanner.nextLine());
+            if (currentSlot < 1 || currentSlot > 3) currentSlot = 1; // Default to 1 if out of bounds
+        } catch (NumberFormatException e) {
+            System.out.println("Invalid input, defaulting to Slot 1.");
+            currentSlot = 1;
+        }
+
+        // Load game with the required areaManager parameter
+        SaveManager.loadGame(gameLogic.getPlayer(), gameLogic, currentSlot, areaManager);
 
         while (running) {
             System.out.println("\n----------- MAIN MENU -----------");
             System.out.println("1. Start Fishing");
-            System.out.println("2. Shop (Coming Soon)");
-            System.out.println("3. Areas (Coming Soon)");
+            System.out.println("2. Shop");
+            System.out.println("3. Areas & Travel");
             System.out.println("4. Player Stats");
             System.out.println("5. Manage Saves (Change Slot)");
             System.out.println("6. Save and Exit");
             System.out.print("Choose an option: ");
 
             String choice = scanner.nextLine();
-            Shop shop = new Shop();
 
             switch (choice) {
                 case "1":
@@ -39,21 +48,31 @@ public class Game {
                     }
                     break;
                 case "2":
+                    // Open shop with player inventory and fish catalog
                     shop.openShop(gameLogic.getPlayer(), gameLogic.getFishCatalog());
                     break;
                 case "3":
-                    System.out.println("Current Area: " + gameLogic.getCurrentZone());
+                    // Open the area travel menu
+                    areaManager.openAreaMenu(gameLogic.getPlayer(), gameLogic);
                     break;
                 case "4":
-                    gameLogic.displayPlayerStats();
+                    // Show current player profile
+                    gameLogic.getPlayer().showStats();
                     break;
                 case "5":
                     System.out.print("Switch to Slot (1, 2, 3): ");
-                    currentSlot = Integer.parseInt(scanner.nextLine());
-                    SaveManager.loadGame(gameLogic.getPlayer(), gameLogic, currentSlot);
+                    try {
+                        currentSlot = Integer.parseInt(scanner.nextLine());
+                        if (currentSlot < 1 || currentSlot > 3) currentSlot = 1;
+                    } catch (NumberFormatException e) {
+                        currentSlot = 1;
+                    }
+                    // Load the newly selected slot
+                    SaveManager.loadGame(gameLogic.getPlayer(), gameLogic, currentSlot, areaManager);
                     break;
                 case "6":
-                    SaveManager.saveGame(gameLogic.getPlayer(), gameLogic.getCurrentZone(), currentSlot);
+                    // Save the game with the required areaManager parameter before exiting
+                    SaveManager.saveGame(gameLogic.getPlayer(), gameLogic.getCurrentZone(), currentSlot, areaManager);
                     System.out.println("Exiting... Tight lines!");
                     running = false;
                     break;
