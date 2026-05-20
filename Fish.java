@@ -1,3 +1,5 @@
+package fishinggamejava.fishinggamejava;
+
 public class Fish {
     int id;
     String name;
