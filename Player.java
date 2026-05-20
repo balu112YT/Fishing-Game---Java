@@ -1,5 +1,9 @@
+package fishinggamejava.fishinggamejava;
+
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class Player {
     private int money;
@@ -18,6 +22,10 @@ public class Player {
     private int equippedBaitType = 0;
     private int baitCount = 0;
 
+    // --- NEW: Fish Records Data Structure ---
+    // Stores fish name -> personal best weight
+    private Map<String, Double> fishRecords = new HashMap<>();
+
     public Player() {
         this.money = 0;
         this.xp = 0;
@@ -31,6 +39,11 @@ public class Player {
     public void addMoney(int amount) { this.money += amount; }
     public void subtractMoney(int amount) { this.money -= amount; }
 
+    /**
+     * Bridge method for dynamic investment/quest calls using short naming convention.
+     */
+    public void subMoney(int amount) { this.money -= amount; }
+
     public void addXp(int amount) {
         this.xp += amount;
         while (this.xp >= xpToNextLevel) {
@@ -41,7 +54,6 @@ public class Player {
     private void levelUp() {
         this.xp -= xpToNextLevel;
         this.level++;
-
 
         this.xpToNextLevel = 100 + (level - 1) * 300;
 
@@ -69,7 +81,7 @@ public class Player {
 
     public void clearInventory() { inventory.clear(); }
 
-    // --- NEW: BONUS CALCULATIONS FOR SHOP & FISHING ---
+    // --- BONUS CALCULATIONS FOR SHOP & FISHING ---
 
     /**
      * Calculates total selling bonus.
@@ -133,6 +145,35 @@ public class Player {
         }
     }
 
+    // --- NEW: JOURNAL & RECORD SYSTEM METHODS ---
+
+    /**
+     * Verifies if the latest caught fish sets a new personal weight record.
+     */
+    public boolean checkAndSaveRecord(String fishName, double weight) {
+        if (!fishRecords.containsKey(fishName) || weight > fishRecords.get(fishName)) {
+            fishRecords.put(fishName, weight);
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Renders the Fish Journal interface with all tracking statistics.
+     */
+    public void showJournal() {
+        System.out.println("\n\u001B[36m==================== FISH JOURNAL ====================\u001B[0m");
+        if (fishRecords.isEmpty()) {
+            System.out.println(" Your journal is empty. Go catch some fish first!");
+        } else {
+            System.out.println(" Your personal best catches:");
+            for (Map.Entry<String, Double> entry : fishRecords.entrySet()) {
+                System.out.printf(" 🐟 %-15s : %.2f kg\n", entry.getKey(), entry.getValue());
+            }
+        }
+        System.out.println("\u001B[36m======================================================\u001B[0m");
+    }
+
     // --- SYSTEM METHODS (Save/Load/Stats) ---
 
     public void loadPlayerData(int xp, int money, int level, List<CaughtFish> loadedInventory,
@@ -163,6 +204,7 @@ public class Player {
         this.reelLevel = 0;
         this.equippedBaitType = 0;
         this.baitCount = 0;
+        this.fishRecords.clear();
     }
 
     public void showStats() {
@@ -214,4 +256,7 @@ public class Player {
 
     public int getBaitCount() { return baitCount; }
     public void setBaitCount(int count) { this.baitCount = count; }
+
+    public Map<String, Double> getFishRecords() { return fishRecords; }
+    public void setFishRecords(Map<String, Double> records) { this.fishRecords = records; }
 }
