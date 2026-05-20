@@ -128,7 +128,7 @@ public class Game {
                     break;
 
                 case "8":
-                    System.out.print("Switch to Slot (1, 2, 3): ");
+                    System.out.print("Switch to any Slot (1, 2, 3...): ");
                     try {
                         currentSlot = Integer.parseInt(scanner.nextLine());
                         if (currentSlot < 1 || currentSlot > 3) currentSlot = 1;
@@ -142,7 +142,7 @@ public class Game {
                 case "9":
                     // Save the game directly passing gameLogic for full component tracking
                     SaveManager.saveGame(gameLogic.getPlayer(), gameLogic, currentSlot, areaManager);
-                    System.out.println("Exiting... Tight lines!");
+                    System.out.println("Exiting game... Tight lines!");
                     running = false;
                     break;
 
