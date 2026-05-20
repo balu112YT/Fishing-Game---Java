@@ -63,7 +63,7 @@ public class Investment {
         }
 
         if (playerFundValue > 21) {
-            System.out.println("\n\u001B[31m!!! MARKET CRASH !!!\u001B[0m Value: " + playerFundValue + ". You lost " + investment + " €.");
+            System.out.println("\n\u001B[31m-- YOU LOST --\u001B[0m Value: " + playerFundValue + ". You lost " + investment + " €.");
             player.subMoney(investment);
             return;
         }
@@ -125,7 +125,7 @@ public class Investment {
                 return;
             }
 
-            // --- KÁRTYA GENERÁLÁSA ---
+
             int rank = random.nextInt(13) + 1; // 1 - 13
             int suitIdx = random.nextInt(4);   // 0 = Hearts, 1 = Diamonds, 2 = Clubs, 3 = Spades
 
@@ -146,10 +146,10 @@ public class Investment {
             else if (rank == 12) rankName = "Queen";
             else if (rank == 13) rankName = "King";
 
-            String cardColorCode = isRed ? "\u001B[31m" : "\u001B[34m"; // Szép kék vagy piros kiírás
+            String cardColorCode = isRed ? "\u001B[31m" : "\u001B[34m";
             String resetCode = "\u001B[0m";
 
-            // --- JÁTÉK INTERAKTÍV MECHANIKÁK ---
+
             boolean win = false;
 
             switch (i) {
@@ -184,7 +184,7 @@ public class Investment {
                 }
             }
 
-            // --- MUTATJUK A KÁRTYÁT ---
+            // Show the card
             System.out.println("\n Dealer draws: " + cardColorCode + "[" + rankName + " of " + suitName + " " + suitSymbol + "]" + resetCode);
 
             if (win) {
@@ -200,7 +200,7 @@ public class Investment {
             }
         }
 
-        // Ha mind az 5 kört túlélte
+        //If lasted all rounds
         System.out.println("\n\u001B[36m=======================================");
         System.out.println(" 🎉🎉🎉 MAX TIER ACHIEVED !!! 🎉🎉🎉");
         System.out.println(" Ultimate ROI unlocked! Total Payout: " + currentPot + " €");
