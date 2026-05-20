@@ -1,3 +1,5 @@
+package fishinggamejava.fishinggamejava;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -10,6 +12,10 @@ public class GameLogic {
     private Random random = new Random();
     private int currentZone = 1; // Default starting zone
     private final String RESET = "\u001B[0m";
+
+    // Quest System Initialization
+    private QuestManager questManager = new QuestManager();
+    public QuestManager getQuestManager() { return questManager; }
 
     // Constructor: Automatically initializes and loads the fish database
     public GameLogic() {
@@ -82,6 +88,23 @@ public class GameLogic {
             System.out.printf("Weight: %.2f kg | Rarity: %s | XP: %d\n", weight, caughtFish.rarity, earnedXp);
             System.out.println("The fish has been added to your bucket (" +
                     player.getInventory().size() + "/" + player.getMaxInventorySize() + ").");
+
+            // ==================== NEW FEATURES IMPLEMENTED HERE ====================
+
+            // 1. RECORD SYSTEM CHECK
+            // Verifies if the caught fish is a new personal best weight record
+            boolean isNewRecord = player.checkAndSaveRecord(caughtFish.name, weight);
+            if (isNewRecord) {
+                System.out.println("\u001B[33m🎉 NEW PERSONAL RECORD for " + caughtFish.name.toUpperCase() + "!\u001B[0m");
+            }
+
+            // 2. QUEST SYSTEM TRACKING
+            // Updates progress: Type 1 = total fish caught, Type 2 = total value/xp tracker
+            questManager.updateAllProgress(1, 1, caughtFish.rarity, player);
+            questManager.updateAllProgress(2, baseValue, caughtFish.rarity, player);
+
+            // =======================================================================
+
         } else {
             if (isBaitTrulyActive) {
                 player.useBait();
