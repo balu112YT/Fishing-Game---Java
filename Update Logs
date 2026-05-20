@@ -28,8 +28,15 @@ Reworked the Save System with the updated standards
 Reworked the Map System
 You can now purchase maps when achieving a set level and paying a fee
 
-Coming Soon:
-Achievements (as Records)
-Quests
-Gamb...-  Investments.
-Stay Tuned!
+
+2026 May 20th
+-Project finished.
+Added Quests you can now acquire quests or reroll them. The difficulty and profit is based on the Area
+Added a Record system where you can see your best catches.
+Added an Investment system where you can double up or lose your money.
+Reworked the Save System
+Reworked the Player
+Reworked the Area & Area Manager
+Reworked the Game logic.
+
+Thank you for playing
