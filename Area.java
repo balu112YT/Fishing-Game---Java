@@ -1,3 +1,5 @@
+package fishinggamejava.fishinggamejava;
+
 public class Area {
     public int id;
     public String name;
