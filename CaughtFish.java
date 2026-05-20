@@ -1,3 +1,5 @@
+package fishinggamejava.fishinggamejava;
+
 public class CaughtFish {
     public int fishId;
     public double weight;
